@@ -13,6 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with "BruhBot".  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package rmi
 
 import org.slf4j.Logger
