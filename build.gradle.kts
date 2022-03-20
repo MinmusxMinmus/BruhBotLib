@@ -18,6 +18,7 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
+    implementation(kotlin("reflect"))
 
     implementation(group = "net.dv8tion", name = "JDA", version = "4.3.0_277")
     implementation(group = "org.apache.logging.log4j", name = "log4j-slf4j-impl", version = "2.9.0")
