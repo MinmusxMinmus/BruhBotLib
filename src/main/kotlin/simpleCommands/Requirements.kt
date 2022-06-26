@@ -24,8 +24,8 @@ import net.dv8tion.jda.api.entities.User
 
 interface MessageRequirement {
     fun check(message: Message): Boolean
-    infix fun and(r2: MessageRequirement): MessageRequirement  = AllRequirements(setOf(this, r2))
-    infix fun or(r2: MessageRequirement): MessageRequirement = AnyRequirements(setOf(this, r2))
+    infix fun and(r2: MessageRequirement): MessageRequirement  = AllRequirements(listOf(this, r2))
+    infix fun or(r2: MessageRequirement): MessageRequirement = AnyRequirements(listOf(this, r2))
 }
 
 class AllRequirements(private val requirements: Collection<MessageRequirement>) : MessageRequirement {
