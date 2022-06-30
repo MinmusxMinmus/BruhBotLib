@@ -119,9 +119,6 @@ class DefaultModule (
     override fun classicCommandDeclarations(): List<ClassicCommandDeclaration> =
         classicCommands.stream().map { it.declaration }.toList()
 
-    /**
-     * Executes the specified command, given the serialized trigger. If the command doesn't exist, does nothing.
-     */
     override fun execute(declaration: ClassicCommandDeclaration, message: MessageOrigin): Boolean {
         for (command in classicCommands) {
             if (command.declaration == declaration) {
