@@ -33,7 +33,7 @@ abstract class ClassicCommand(val declaration: ClassicCommandDeclaration): Seria
     fun execute(message: Message) {
         // Permission check
         update("Begin command permission check")
-        // This is terrible, but fuck you
+        // This is terrible, but w.e.
         if (!declaration.requirements.check(message)) {
             error("Permission check failed", null)
             execWhenBadPerms(message)
