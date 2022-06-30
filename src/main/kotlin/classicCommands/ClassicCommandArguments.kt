@@ -23,7 +23,7 @@ import rmi.Logging
 import rmi.logger
 import java.io.Serializable
 
-class Parameter(
+data class Parameter(
     val name: String,
     val description: String,
     val location: ParameterLocation,
