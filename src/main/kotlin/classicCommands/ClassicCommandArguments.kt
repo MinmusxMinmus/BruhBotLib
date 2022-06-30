@@ -38,7 +38,7 @@ class NoParameter(private val parameter: Parameter): ParameterResult {
     override fun error() = true
     override fun value() = "No value for parameter '${parameter.name}'"
 }
-class NullParameter(private val parameter: Parameter): ParameterResult {
+class NullValue(private val parameter: Parameter): ParameterResult {
     override fun error() = false
     override fun value() = "Null parameter for '${parameter.name}'"
 }
@@ -119,7 +119,7 @@ abstract class ParameterParser: Logging, Serializable {
     abstract fun parse(parameter: Parameter, obj: Any): ParameterResult
 }
 class NullParser: ParameterParser() {
-    override fun parse(parameter: Parameter, obj: Any) = NullParameter(parameter)
+    override fun parse(parameter: Parameter, obj: Any) = NullValue(parameter)
 }
 class StringParser: ParameterParser() {
     override fun parse(parameter: Parameter, obj: Any) = StringValue(obj.toString())
