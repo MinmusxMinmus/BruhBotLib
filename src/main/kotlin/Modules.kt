@@ -73,15 +73,29 @@ object ModuleManager: Logging {
  * [name] needs to be a unique identifier for the module.
  */
 interface Module: Remote {
+    /**
+     * Returns the module's name. This string must be a unique identifier.
+     */
     @Throws(RemoteException::class)
     fun name(): String
 
-    @Throws(RemoteException::class)
-    fun execute(declaration: ClassicCommandDeclaration, message: MessageOrigin): Boolean
-
+    /**
+     * Returns a collection containing all [ClassicCommandDeclaration] objects defined by the module.
+     */
     @Throws(RemoteException::class)
     fun classicCommandDeclarations(): Collection<ClassicCommandDeclaration>
+
+    /**
+     * Executes the specified command, given the serialized trigger. If the command doesn't exist, does nothing. Returns
+     * `true` or `false` whether the command executed anything or not.
+     */
+    @Throws(RemoteException::class)
+    fun execute(declaration: ClassicCommandDeclaration, message: MessageOrigin): Boolean
 }
+
+/**
+ * Default implementation of the [Module] interface.
+ */
 class DefaultModule (
     private val name: String,
     private val classicCommands: Collection<ClassicCommand>,
@@ -119,14 +133,31 @@ class DefaultModule (
     }
 }
 
-class MessageOrigin(private val messageID: Long, private val channelID: Long, private val isPrivateChannel: Boolean): Serializable {
+/**
+ * Serializable class that allows passing of [Message] objects through RMI.
+ * This class holds enough information to be able to retrieve a specific message using an existing JDA instance.
+ */
+class MessageOrigin(private val messageID: Long, private val channelID: Long, private val isPrivateChannel: Boolean): Serializable, Logging {
     companion object {
+        /**
+         * Transforms a [Message] into its [MessageOrigin] representation.
+         */
         fun from(message: Message) = MessageOrigin(message.idLong, message.channel.idLong, message.isFromType(
             ChannelType.PRIVATE))
     }
 
+    /**
+     * Returns a [RestAction] containing the [Message] this object represents.
+     */
     internal fun get(jda: JDA): RestAction<Message>? {
+        logger.info("Begin message retrieving")
+        logger.debug("Message ID: '$messageID', channel ID: '$channelID', private channel: $isPrivateChannel'")
         val channel = if (isPrivateChannel) jda.privateChannelCache.getElementById(channelID) else jda.textChannelCache.getElementById(channelID)
-        return channel?.retrieveMessageById(messageID)
+        if (channel == null) {
+            logger.warn("Obtained channel is null, cannot retrieve the message")
+            return null
+        }
+        logger.info("Message retrieving successful")
+        return channel.retrieveMessageById(messageID)
     }
 }
