@@ -21,8 +21,8 @@ import net.dv8tion.jda.api.entities.ChannelType
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.requests.RestAction
-import rmi.simpleCommands.ClassicCommand
-import rmi.simpleCommands.ClassicCommandDeclaration
+import classicCommands.ClassicCommand
+import classicCommands.ClassicCommandDeclaration
 import java.io.Serializable
 import java.rmi.Remote
 import java.rmi.RemoteException

@@ -15,11 +15,8 @@
  * along with "BruhBot".  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package rmi.simpleCommands
+package classicCommands
 
-import classicCommands.MessageRequirement
-import classicCommands.ParameterConfiguration
-import classicCommands.ParameterResult
 import net.dv8tion.jda.api.entities.Message
 import rmi.Logging
 import rmi.logger
@@ -88,7 +85,8 @@ abstract class ClassicCommand(val declaration: ClassicCommandDeclaration): Seria
 data class ClassicCommandDeclaration(val name: String,
                                      val description: String,
                                      val requirements: MessageRequirement,
-                                     val signature: ClassicCommandSignature): Serializable
+                                     val signature: ClassicCommandSignature
+): Serializable
 
 class ClassicCommandParameters(val parameters: List<ParameterResult>, val option: Int)
 
