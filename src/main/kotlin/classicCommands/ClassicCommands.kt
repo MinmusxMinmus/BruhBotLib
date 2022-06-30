@@ -39,10 +39,9 @@ abstract class ClassicCommand(val declaration: ClassicCommandDeclaration): Seria
             execWhenBadPerms(message)
             return
         }
-
         update("Finished command permission check")
 
-        // Argument check 1:
+        // Argument check
         update("Begin command argument check")
         parameters = declaration.signature.parse(message)
         if (parameters.option == -1) {
