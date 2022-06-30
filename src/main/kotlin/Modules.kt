@@ -120,8 +120,12 @@ class DefaultModule (
         classicCommands.stream().map { it.declaration }.toList()
 
     override fun execute(declaration: ClassicCommandDeclaration, message: MessageOrigin): Boolean {
+        logger.info("Attempting to execute classic command '${declaration.name}'")
+        logger.debug("Evaluating all classic commands")
         for (command in classicCommands) {
+            logger.debug("Evaluating command '${command.declaration.name}'")
             if (command.declaration == declaration) {
+                logger.debug("Command '${command.declaration.name}' found")
                 message.get(jda!!)?.queue { command.execute(it) }
                 return true
             }
@@ -135,12 +139,13 @@ class DefaultModule (
  * This class holds enough information to be able to retrieve a specific message using an existing JDA instance.
  */
 class MessageOrigin(private val messageID: Long, private val channelID: Long, private val isPrivateChannel: Boolean): Serializable, Logging {
-    companion object {
+    companion object: Logging {
         /**
          * Transforms a [Message] into its [MessageOrigin] representation.
          */
         fun from(message: Message) = MessageOrigin(message.idLong, message.channel.idLong, message.isFromType(
             ChannelType.PRIVATE))
+        private val logger = logger()
     }
 
     /**
