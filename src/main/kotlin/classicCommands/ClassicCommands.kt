@@ -23,6 +23,13 @@ import rmi.logger
 import rmi.misc.ExecutionLog
 import java.io.Serializable
 
+/**
+ * A `ClassicCommand` is the simplest interaction a user can make with a Discord bot. The command is triggered by a
+ * user's message, after which the bot performs some argument and permission checks before executing the requested
+ * command.
+ *
+ * Every classic command is defined by its [ClassicCommandDeclaration].
+ */
 abstract class ClassicCommand(val declaration: ClassicCommandDeclaration): Serializable, Logging {
     companion object : Logging {
         val logger = logger()
@@ -30,6 +37,9 @@ abstract class ClassicCommand(val declaration: ClassicCommandDeclaration): Seria
     val status = ExecutionLog()
     var parameters = ClassicCommandParameters(listOf(), -1)
 
+    /**
+     * Executes the command for the given message. Performs all argument and permission checks.
+     */
     fun execute(message: Message) {
         // Permission check
         update("Begin command permission check")
@@ -61,34 +71,72 @@ abstract class ClassicCommand(val declaration: ClassicCommandDeclaration): Seria
         }
     }
 
+    /**
+     * Logging function that additionally stores an event on the [ExecutionLog].
+     */
     protected fun debug(message: String) {
         logger.debug(message)
         status.update(message)
     }
 
+    /**
+     * Logging function that additionally stores an event on the [ExecutionLog].
+     */
     protected fun update(message: String) {
         logger.info(message)
         status.update(message)
     }
 
+    /**
+     * Logging function that additionally stores an event on the [ExecutionLog].
+     */
     protected fun error(message: String, exception: Exception?) {
         logger.error(message)
         status.error(message, exception)
     }
 
+    /**
+     * This function will execute when a command cannot be executed due to bad arguments.
+     */
     abstract fun execWhenBadArgs(message: Message)
+
+    /**
+     * This function will execute when a command cannot be executed due to bad permissions.
+     */
     abstract fun execWhenBadPerms(message: Message)
+
+    /**
+     * This function will be executed after all permission and argument checks. It contains the main command execution
+     * logic.
+     */
     abstract fun exec(message: Message)
 }
 
+/**
+ * A `ClassicCommandDeclaration` object holds the necessary data to uniquely identify and explain a command. Every
+ * declaration includes a user-friendly name and description, as well as a list of [MessageRequirement] objects and a
+ * [ClassicCommandSignature].
+ */
 data class ClassicCommandDeclaration(val name: String,
                                      val description: String,
                                      val requirements: MessageRequirement,
                                      val signature: ClassicCommandSignature
 ): Serializable
 
+
+/**
+ * After parsing the [ClassicCommandSignature], a `ClassicCommandParameters` object is created. This object
+ * contains a list of [ParameterResult] objects, one for each parameter, as well as an integer pointing to the matching
+ * [ParameterConfiguration].
+ */
 class ClassicCommandParameters(val list: List<ParameterResult>, val option: Int)
 
+/**
+ * The `ClassicCommandSignature` object represents the command's parameters. It includes a series of
+ * [ParameterConfiguration] alternatives, one for each different parameter configuration, way of parsing, etc.
+ * The different configurations are listed in priority order, meaning that the first matching configuration will be
+ * the one parsed.
+ */
 class ClassicCommandSignature(private val alternatives: List<ParameterConfiguration>): Logging, Serializable {
     companion object : Logging {
         val logger = logger()
