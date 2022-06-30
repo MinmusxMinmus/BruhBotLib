@@ -225,7 +225,7 @@ class DecimalParser: ParameterParser() {
  * the message and maps each one to each parameter. For this purpose, the object requires a [ContentSeparator], an
  * [AttachmentSeparator] and a [GenericSeparator].
  *
- * The class includes various constructors that omit some separators. When ommitted, the class will assume that any
+ * The class includes various constructors that omit some separators. When omitted, the class will assume that any
  * plausible arguments from that specific separator should be ignored.
  */
 class ArgumentSeparator(
@@ -329,7 +329,7 @@ class SpaceSeparator: ContentSeparator("Parameters are separated by spaces") {
             throw IllegalArgumentException("Number of parameter strings found do not match the expected parameters")
         }
 
-        // Enough parameters means they will be matched in order
+        // With enough parameters, they will be matched in order
         logger.debug("Matching each parameter string to the corresponding parameter")
         for (i in parameters.indices) ret[parameters[i]] = split[i + 1]
         logger.info("Content separation successful")
