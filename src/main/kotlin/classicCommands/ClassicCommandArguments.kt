@@ -17,6 +17,7 @@
 
 package classicCommands
 
+import classicCommands.MessageLocation.*
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.Message.Attachment
 import rmi.Logging
@@ -193,13 +194,13 @@ class ArgumentSeparator(
         logger.info("Begin argument separation")
         logger.debug("Amount of parameters to extract: ${parameters.size}")
         logger.debug("Extracting parameters from message content")
-        val contentParameters = parameters.stream().filter { it.location == ParameterLocation.CONTENT }.toList()
+        val contentParameters = parameters.stream().filter { it.location == CONTENT }.toList()
         logger.debug("Parameters extracted from message content. Amount: ${contentParameters.size}")
         logger.debug("Extracting parameters from attachments")
-        val attachmentParameters = parameters.stream().filter { it.location == ParameterLocation.ATTACHMENTS }.toList()
+        val attachmentParameters = parameters.stream().filter { it.location == ATTACHMENTS }.toList()
         logger.debug("Parameters extracted from attachments. Amount: ${attachmentParameters.size}")
         logger.debug("Extracting additional parameters")
-        val otherParameters = parameters.stream().filter { it.location == ParameterLocation.OTHER }.toList()
+        val otherParameters = parameters.stream().filter { it.location == OTHER }.toList()
         logger.debug("Additional parameters extracted. Amount: ${otherParameters.size}")
 
         val total = contentParameters.size + attachmentParameters.size + otherParameters.size
