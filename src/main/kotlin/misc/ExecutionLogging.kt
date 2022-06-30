@@ -25,7 +25,7 @@ class ExecutionError(message: String, val exception: Exception?): ExecutionEvent
 class ExecutionMilestone(message: String): ExecutionEvent(message)
 
 class ExecutionLog {
-    val events: MutableList<ExecutionEvent> = mutableListOf()
+    private val events: MutableList<ExecutionEvent> = mutableListOf()
     val success = try {
         events.last() !is ExecutionError
     } catch (e: NoSuchElementException) {
@@ -44,4 +44,6 @@ class ExecutionLog {
     fun error(message: String, exception: Exception?) {
         events.add(ExecutionError(message, exception))
     }
+
+    fun events(): List<ExecutionEvent> = events.toList()
 }
