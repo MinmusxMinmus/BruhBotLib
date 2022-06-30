@@ -26,8 +26,16 @@ class ExecutionMilestone(message: String): ExecutionEvent(message)
 
 class ExecutionLog {
     val events: MutableList<ExecutionEvent> = mutableListOf()
-    val success = events.last() !is ExecutionError
-    val lastError = events.last().message
+    val success = try {
+        events.last() !is ExecutionError
+    } catch (e: NoSuchElementException) {
+        false
+    }
+    val lastError = try {
+        events.last().message
+    } catch (e: NoSuchElementException) {
+        ""
+    }
 
     fun update(message: String) {
         events.add(ExecutionMilestone(message))
