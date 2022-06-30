@@ -21,8 +21,9 @@ import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.ChannelType
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.User
+import java.io.Serializable
 
-interface MessageRequirement {
+interface MessageRequirement: Serializable {
     fun check(message: Message): Boolean
     infix fun and(r2: MessageRequirement): MessageRequirement = AllRequirements(listOf(this, r2))
     infix fun or(r2: MessageRequirement): MessageRequirement = AnyRequirements(listOf(this, r2))
