@@ -26,7 +26,7 @@ import java.io.Serializable
 data class Parameter(
     val name: String,
     val description: String,
-    val location: ParameterLocation,
+    val location: MessageLocation,
     val parser: ParameterParser,
 ): Serializable
 
@@ -108,7 +108,7 @@ class ParameterConfiguration(val description: String, private val separator: Arg
     }
 }
 
-enum class ParameterLocation: Serializable {
+enum class MessageLocation: Serializable {
     CONTENT, ATTACHMENTS, OTHER
 }
 
