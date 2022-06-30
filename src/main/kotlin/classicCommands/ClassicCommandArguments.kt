@@ -24,6 +24,11 @@ import rmi.Logging
 import rmi.logger
 import java.io.Serializable
 
+/**
+ * The parameter class holds all information required to identify, derive, and utilize a parameter.
+ * Every parameter includes a user-friendly name and description, as well as the [MessageLocation] of the parameter and
+ * a specific [ParameterParser].
+ */
 data class Parameter(
     val name: String,
     val description: String,
@@ -31,10 +36,19 @@ data class Parameter(
     val parser: ParameterParser,
 ): Serializable
 
+/**
+ * A parameter result object represents the value of a given parameter. Erroneous values are identified with the [error]
+ * function, and the specific value is obtained using the [value] method.
+ */
 interface ParameterResult: Serializable {
     fun error(): Boolean
     fun value(): Any
 }
+
+/**
+ * An invalid parameter. Receiving a NoParameter object means that the [ParameterParser] was unable to extract a
+ * value from the given message.
+ */
 class NoParameter(private val parameter: Parameter): ParameterResult {
     override fun error() = true
     override fun value() = "No value for parameter '${parameter.name}'"
@@ -60,8 +74,21 @@ class DecimalValue(private val value: Double): ParameterResult {
     override fun value() = value
 }
 
-class ParameterConfiguration(val description: String, private val separator: ArgumentSeparator, private val parameters: List<Parameter>):
-    Logging, Serializable {
+/**
+ * Represents a single parameter distribution possibility.
+ *
+ * When declaring a command, sometimes it is necessary to allow multiple parameter configurations. For example: a
+ * command might have one configuration with all parameters, and another with omitted parameters that will instead take
+ * default values. Each configuration corresponds to one [ParameterConfiguration] object.
+ *
+ * Each configuration contains a user-friendly description, as well as an [ArgumentSeparator] and the [Parameter] list.
+ * The order of parameters is important, and they are usually sorted by [MessageLocation].
+ */
+class ParameterConfiguration(
+    val description: String,
+    private val separator: ArgumentSeparator,
+    private val parameters: List<Parameter>,
+): Logging, Serializable {
         companion object : Logging {
             val logger = logger()
         }
@@ -109,22 +136,43 @@ class ParameterConfiguration(val description: String, private val separator: Arg
     }
 }
 
+/**
+ * One of the locations where a parameter might be located.
+ *
+ * [CONTENT] represents the message's text body as obtained by [Message.getContentRaw]
+ *
+ * [ATTACHMENTS] represents a message's attachment list
+ *
+ * [OTHER] represents any other possible locations.
+ */
 enum class MessageLocation: Serializable {
     CONTENT, ATTACHMENTS, OTHER
 }
 
+/**
+ * The `ParameterParser` class takes an object, and transforms it into a [ParameterResult].
+ */
 abstract class ParameterParser: Logging, Serializable {
     companion object : Logging {
         val logger = logger()
     }
     abstract fun parse(parameter: Parameter, obj: Any): ParameterResult
 }
+
+/**
+ * Transforms everything into a [NullValue] result.
+ */
 class NullParser: ParameterParser() {
     override fun parse(parameter: Parameter, obj: Any) = NullValue(parameter)
 }
 class StringParser: ParameterParser() {
     override fun parse(parameter: Parameter, obj: Any) = StringValue(obj.toString())
 }
+
+/**
+ * Verifies that the input string corresponds to one of the keywords, and transforms it into a [StringValue] result. If
+ * no match was found, it returns a [NoParameter] result.
+ */
 class KeywordParser(private val keywords: Collection<String>): ParameterParser() {
     override fun parse(parameter: Parameter, obj: Any): ParameterResult {
         with(obj as String) { for (k in keywords) if (this == k) {
@@ -172,6 +220,14 @@ class DecimalParser: ParameterParser() {
     }
 }
 
+/**
+ * The `ArgumentSeparator` class takes in a [Message] object, and given a list of parameters it extracts objects from
+ * the message and maps each one to each parameter. For this purpose, the object requires a [ContentSeparator], an
+ * [AttachmentSeparator] and a [GenericSeparator].
+ *
+ * The class includes various constructors that omit some separators. When ommitted, the class will assume that any
+ * plausible arguments from that specific separator should be ignored.
+ */
 class ArgumentSeparator(
     val description: String,
     private val contentSeparator: ContentSeparator,
@@ -221,6 +277,9 @@ class ArgumentSeparator(
         return ret.toMap()
     }
 
+    /**
+     * Extracted method to check for overriding parameters.
+     */
     private fun mergeEntry(ret: MutableMap<Parameter, Any?>, key: Parameter, value: Any?) {
         // Check first for duplicates, for logging purposes
         if (ret.containsKey(key)) {
@@ -233,6 +292,10 @@ class ArgumentSeparator(
     }
 }
 
+/**
+ * The `ContentSeparator` class obtains arguments from the [MessageLocation.CONTENT] region. It receives as input the
+ * [Message.getContentRaw] string, and the list of expected [Parameter] objects.
+ */
 abstract class ContentSeparator(val description: String): Logging, Serializable {
     companion object : Logging {
         val logger = logger()
@@ -244,6 +307,12 @@ abstract class ContentSeparator(val description: String): Logging, Serializable 
      */
     abstract fun split(content: String, parameters: List<Parameter>): Map<Parameter, String?>
 }
+
+/**
+ * Splits the content string using spaces as separators.
+ * The separator will fail if the number of parameters found is not equal to the number of expected ones.
+ * Furthermore, using spaces means that this separator cannot parse arguments that contain spaces.
+ */
 class SpaceSeparator: ContentSeparator("Parameters are separated by spaces") {
     override fun split(content: String, parameters: List<Parameter>): Map<Parameter, String?> {
         logger.info("Begin content separation")
@@ -267,10 +336,18 @@ class SpaceSeparator: ContentSeparator("Parameters are separated by spaces") {
         return ret.toMap()
     }
 }
+
+/**
+ * This separator ignores all parameters and returns an empty map.
+ */
 class EmptyContentSeparator: ContentSeparator("Placeholder for when there's no parameters") {
     override fun split(content: String, parameters: List<Parameter>) = mapOf<Parameter, String>()
 }
 
+/**
+ * The `AttachmentSeparator` class obtains arguments from the [MessageLocation.ATTACHMENTS] region. It receives as input
+ * the [Message.getAttachments] list, and the list of expected [Parameter] objects.
+ */
 abstract class AttachmentSeparator(val description: String): Logging, Serializable {
     companion object : Logging {
         val logger = logger()
@@ -278,21 +355,32 @@ abstract class AttachmentSeparator(val description: String): Logging, Serializab
 
     abstract fun split(attachments: List<Attachment>, parameters: List<Parameter>): Map<Parameter, Attachment?>
 }
+
+/**
+ * This separator matches, in order, each parameter to the corresponding attachment.
+ */
 class DefaultAttachmentSeparator : AttachmentSeparator("Each attachments maps to each parameter, in order") {
     override fun split(attachments: List<Attachment>, parameters: List<Parameter>): Map<Parameter, Attachment?> {
         val ret = mutableMapOf<Parameter, Attachment?>()
 
-        if (attachments.size != parameters.size)
-            for (parameter in parameters) ret[parameter] = null
-        else
-            for (i in 0..parameters.size) ret[parameters[i]] = attachments[i]
+        if (attachments.size != parameters.size) return mapOf()
+
+        for (i in 0..parameters.size) ret[parameters[i]] = attachments[i]
         return ret.toMap()
     }
 }
+
+/**
+ * This separator ignores all parameters and returns an empty map.
+ */
 class EmptyAttachmentSeparator: AttachmentSeparator("Placeholder for when there's no parameters") {
     override fun split(attachments: List<Attachment>, parameters: List<Parameter>) = mapOf<Parameter, Attachment>()
 }
 
+/**
+ * The `GenericSeparator` class obtains arguments from the [MessageLocation.OTHER] region. It receives as input the
+ * entire [Message], and the list of expected [Parameter] objects.
+ */
 abstract class GenericSeparator(val description: String): Logging, Serializable {
     companion object : Logging {
         val logger = logger()
@@ -300,6 +388,10 @@ abstract class GenericSeparator(val description: String): Logging, Serializable 
 
     abstract fun split(message: Message, parameters: List<Parameter>): Map<Parameter, Any?>
 }
+
+/**
+ * This separator ignores all parameters and returns an empty map.
+ */
 class EmptyGenericSeparator: GenericSeparator("Placeholder for when there's no parameters") {
     override fun split(message: Message, parameters: List<Parameter>) = mapOf<Parameter, Any>()
 }
