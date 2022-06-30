@@ -88,7 +88,7 @@ data class ClassicCommandDeclaration(val name: String,
                                      val signature: ClassicCommandSignature
 ): Serializable
 
-class ClassicCommandParameters(val parameters: List<ParameterResult>, val option: Int)
+class ClassicCommandParameters(val list: List<ParameterResult>, val option: Int)
 
 class ClassicCommandSignature(private val alternatives: List<ParameterConfiguration>): Logging, Serializable {
     companion object : Logging {
