@@ -96,7 +96,7 @@ class DefaultModule (
         jda ?: let {
             logger.warn("JDA building begin. Don't call any commands or other functions before this finishes")
             jda = JDABuilder.createDefault(token, intents).build().awaitReady()
-            logger.warn("JDA building finished")
+            logger.info("JDA building finished")
         }
     }
 
