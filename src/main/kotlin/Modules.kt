@@ -29,11 +29,18 @@ import java.rmi.RemoteException
 import java.rmi.registry.LocateRegistry
 import java.rmi.server.UnicastRemoteObject
 
+/**
+ * The module manager handles registration of RMI modules, as well as being able to remove them from the registry.
+ */
 object ModuleManager: Logging {
     private val logger = logger()
     private const val PORT_STUB = 0
     private const val PORT_REGISTRY = 1099
 
+    /**
+     * Registers a [Module] in the registry. In case of any errors, the method will not modify the registry, and will
+     * simply log the error.
+     */
     fun register(module: Module) {
         try {
             logger.info("Registering module '${module.name()}'")
@@ -49,6 +56,10 @@ object ModuleManager: Logging {
         }
     }
 
+    /**
+     * Removes a [Module] from the registry. If the module doesn't exist, or any other errors pop up, the method will
+     * not modify the registry, and will simply log the error.
+     */
     fun unregister(module: Module) {
         try {
             logger.info("Unregistering module '${module.name()}'")
