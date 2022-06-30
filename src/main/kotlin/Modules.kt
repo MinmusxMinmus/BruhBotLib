@@ -36,28 +36,28 @@ object ModuleManager: Logging {
 
     fun register(module: Module) {
         try {
-            logger.info("Registering module '${module.name}'")
-            val stub = UnicastRemoteObject.exportObject(module, PORT_STUB) as Module
+            logger.info("Registering module '${module.name()}'")
+            val stub = UnicastRemoteObject.exportObject(module, PORT_STUB)
             logger.debug("Stub exported to port $PORT_STUB")
             val registry = LocateRegistry.getRegistry(PORT_REGISTRY)
             logger.debug("Registry located at port $PORT_REGISTRY")
-            registry.rebind(module.name, stub)
-            logger.info("Successfully registered module '${module.name}'")
+            registry.rebind(module.name(), stub)
+            logger.info("Successfully registered module '${module.name()}'")
         } catch (e: Exception) {
-            logger.error("Unable to export module '${module.name}'")
+            logger.error("Unable to export module '${module.name()}'")
             logger.error("Trace: ${e.stackTraceToString()}")
         }
     }
 
     fun unregister(module: Module) {
         try {
-            logger.info("Unregistering module '${module.name}'")
+            logger.info("Unregistering module '${module.name()}'")
             val registry = LocateRegistry.getRegistry(PORT_REGISTRY)
             logger.debug("Registry located at port $PORT_REGISTRY")
-            registry.unbind(module.name)
-            logger.info("Successfully unregistered module '${module.name}'")
+            registry.unbind(module.name())
+            logger.info("Successfully unregistered module '${module.name()}'")
         } catch (e: Exception) {
-            logger.error("Unable to unregister module '${module.name}'")
+            logger.error("Unable to unregister module '${module.name()}'")
             logger.error("Trace: ${e.stackTraceToString()}")
         }
     }
@@ -72,23 +72,26 @@ object ModuleManager: Logging {
  *
  * [name] needs to be a unique identifier for the module.
  */
-abstract class Module(
-    val name: String,
+interface Module: Remote {
+    @Throws(RemoteException::class)
+    fun name(): String
 
-    // Addon functionalities
+    @Throws(RemoteException::class)
+    fun execute(declaration: ClassicCommandDeclaration, message: MessageOrigin): Boolean
+
+    @Throws(RemoteException::class)
+    fun classicCommandDeclarations(): Collection<ClassicCommandDeclaration>
+}
+class DefaultModule (
+    private val name: String,
     private val classicCommands: Collection<ClassicCommand>,
-
-    // JDA initializaton
     intents: Collection<GatewayIntent>,
-    token: String) : Remote, Logging {
+    token: String
+) : Module, Logging {
     companion object : Logging {
         var jda: JDA? = null
         private val logger = logger()
     }
-
-    // Visible command details
-    val classicCommandDeclarations = classicCommands.stream().map { it.declaration }.toList()
-
     init {
         jda ?: let {
             logger.warn("JDA building begin. Don't call any commands or other functions before this finishes")
@@ -97,11 +100,15 @@ abstract class Module(
         }
     }
 
+    override fun name(): String = name
+
+    override fun classicCommandDeclarations(): List<ClassicCommandDeclaration> =
+        classicCommands.stream().map { it.declaration }.toList()
+
     /**
      * Executes the specified command, given the serialized trigger. If the command doesn't exist, does nothing.
      */
-    @Throws(RemoteException::class)
-    fun execute(declaration: ClassicCommandDeclaration, message: MessageOrigin): Boolean {
+    override fun execute(declaration: ClassicCommandDeclaration, message: MessageOrigin): Boolean {
         for (command in classicCommands) {
             if (command.declaration == declaration) {
                 message.get(jda!!)?.queue { command.execute(it) }
