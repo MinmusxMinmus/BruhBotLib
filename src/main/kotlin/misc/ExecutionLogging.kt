@@ -17,7 +17,9 @@
 
 package rmi.misc
 
-abstract class ExecutionEvent(val message: String)
+import java.time.Instant
+
+abstract class ExecutionEvent(val message: String, val timestamp: Instant = Instant.now())
 
 class ExecutionError(message: String, val exception: Exception?): ExecutionEvent(message)
 class ExecutionMilestone(message: String): ExecutionEvent(message)
