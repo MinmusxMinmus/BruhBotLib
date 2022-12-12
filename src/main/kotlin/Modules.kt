@@ -15,14 +15,14 @@
  */
 package rmi
 
-import net.dv8tion.jda.api.JDA
-import net.dv8tion.jda.api.JDABuilder
-import net.dv8tion.jda.api.entities.ChannelType
-import net.dv8tion.jda.api.entities.Message
-import net.dv8tion.jda.api.requests.GatewayIntent
-import net.dv8tion.jda.api.requests.RestAction
 import classicCommands.ClassicCommand
 import classicCommands.ClassicCommandDeclaration
+import net.dv8tion.jda.api.JDA
+import net.dv8tion.jda.api.JDABuilder
+import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.entities.channel.ChannelType
+import net.dv8tion.jda.api.requests.GatewayIntent
+import net.dv8tion.jda.api.requests.RestAction
 import java.io.Serializable
 import java.rmi.Remote
 import java.rmi.RemoteException
