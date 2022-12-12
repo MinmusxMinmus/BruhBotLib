@@ -67,7 +67,7 @@ class RequireUser(private val userid: Long) : MessageRequirement {
 }
 
 /**
- * A condition that is fulfilled when the [MessageChannel] where the message was sent corresponds to the supplemented
+ * A condition that is fulfilled when the channel where the message was sent corresponds to the supplemented
  * [channelId]
  */
 class RequireChannel(private val channelId: Long) : MessageRequirement {
