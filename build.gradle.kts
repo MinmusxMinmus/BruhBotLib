@@ -20,9 +20,9 @@ dependencies {
     testImplementation(kotlin("test"))
     implementation(kotlin("reflect"))
 
-    implementation(group = "net.dv8tion", name = "JDA", version = "4.3.0_277")
-    implementation(group = "org.apache.logging.log4j", name = "log4j-slf4j-impl", version = "2.9.0")
-    implementation(group = "com.fasterxml.jackson.dataformat", name = "jackson-dataformat-yaml", version = "2.7.3")
+    implementation(group = "net.dv8tion", name = "JDA", version = "5.0.0-beta.2")
+    implementation(group = "org.apache.logging.log4j", name = "log4j-slf4j-impl", version = "2.19.0")
+    implementation(group = "com.fasterxml.jackson.dataformat", name = "jackson-dataformat-yaml", version = "2.14.1")
 }
 
 tasks.test {
